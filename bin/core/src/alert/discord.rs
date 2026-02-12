@@ -230,14 +230,8 @@ pub async fn send_alert(
       )
     }
     AlertData::Custom { message, details } => {
-      format!(
-        "{level} | {message}{}",
-        if details.is_empty() {
-          format_args!("")
-        } else {
-          format_args!("\n{details}")
-        }
-      )
+      let details_string = if details.is_empty() { "" } else { "\n{details}" };
+      format!("{level} | {message}{}", format_args!("{details_string}"))
     }
     AlertData::None {} => Default::default(),
   };
