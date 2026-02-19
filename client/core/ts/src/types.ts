@@ -5217,6 +5217,8 @@ export interface CreateVariable {
 export interface CustomAlerterEndpoint {
 	/** The http/s endpoint to send the POST to */
 	url: string;
+	/** The custom key:value params to include in the POST to url */
+	custom_params?: string;
 }
 
 /**

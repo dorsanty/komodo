@@ -59,7 +59,25 @@ export const EndpointConfig = ({
         }
         readOnly={disabled}
       />
-      {endpoint.type == "Ntfy" ? (
+      { endpoint.type == "Custom" ? (
+         <ConfigItem
+          label="Custom Data"
+          description="Customize the HTTP POST request data. The alert content can be used as '%alert%'"
+        >
+          <Input
+            value={endpoint.params.custom_params}
+            type="text"
+            readOnly={disabled}
+            placeholder="%alert%"
+            onChange={(input) =>
+              set({
+                ...endpoint,
+                params: { ...endpoint.params, custom_params: input.target.value },
+              })
+            }
+          ></Input>
+        </ConfigItem>          
+      ) : endpoint.type == "Ntfy" ? (
         <ConfigItem
           label="Email"
           description="Request Ntfy to send an email to this address. SMTP must be configured on the Ntfy instance. Only one email address per alerter is supported."

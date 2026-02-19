@@ -147,12 +147,14 @@ pub struct CustomAlerterEndpoint {
   #[serde(default = "default_custom_url")]
   #[builder(default = "default_custom_url()")]
   pub url: String,
+  pub custom_params: String,
 }
 
 impl Default for CustomAlerterEndpoint {
   fn default() -> Self {
     Self {
       url: default_custom_url(),
+      custom_params: String::from("%alert%"),
     }
   }
 }
