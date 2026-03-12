@@ -117,8 +117,8 @@ pub async fn send_alert_to_alerter(
   }
 
   match &alerter.config.endpoint {
-    AlerterEndpoint::Custom(CustomAlerterEndpoint { url, custom_params }) => {
-      send_custom_alert(url, custom_params, alert).await.with_context(|| {
+    AlerterEndpoint::Custom(CustomAlerterEndpoint { url, data_template, data_format }) => {
+      send_custom_alert(url, data_template, data_format, alert).await.with_context(|| {
         format!(
           "Failed to send alert to Custom Alerter {}",
           alerter.name
@@ -165,7 +165,8 @@ pub async fn send_alert_to_alerter(
 #[instrument(level = "debug")]
 async fn send_custom_alert(
   url: &str,
-  custom_params: &str,
+  data_template: &str,
+  data_format: &AlerterDataFormat,
   alert: &Alert,
 ) -> anyhow::Result<()> {
   let VariablesAndSecrets { variables, secrets } =
@@ -177,14 +178,10 @@ async fn send_custom_alert(
 
   interpolator.interpolate_string(&mut url_interpolated)?;
 
-  let alert_string = serde_json::to_string(&alert)?;
-  let json_alert_string = serde_json::to_string(&alert_string)?;
-  let json_post_string = custom_params.replace("%alert%", &json_alert_string);
-
   let res = reqwest::Client::new()
     .post(url_interpolated)
     .header("Content-Type", "application/json")
-    .body(json_post_string)
+    .body(fmt_custom_data(&data_template, &data_format, &alert)?)
     .send()
     .await
     .map_err(|e| {
@@ -256,6 +253,33 @@ fn resource_link(
     resource_type,
     id,
   )
+}
+
+fn fmt_custom_data(
+  template: &str,
+  format: &AlerterDataFormat,
+  alert: &Alert,
+) -> anyhow::Result<String> {
+  let json = match format {
+      AlerterDataFormat::PrettyString => {
+        let pretty = serde_json::to_string_pretty(alert)
+          .context("failed to serialize Alert to pretty json string")?;
+        serde_json::to_string(&pretty)
+          .context("failed to escape pretty json string")?
+      }
+      AlerterDataFormat::String => {
+        let compact = serde_json::to_string(alert)
+          .context("failed to serialize Alert to json string")?;
+        serde_json::to_string(&compact)
+          .context("failed to escape json string")?
+      }
+      AlerterDataFormat::Data => {
+        serde_json::to_string(alert)
+          .context("failed to serialize Alert to json string")?
+      }
+    };
+
+    Ok(template.replace("%alert%", &json))
 }
 
 /// Standard message content format

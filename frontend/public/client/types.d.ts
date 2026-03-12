@@ -5052,6 +5052,9 @@ export interface CreateVariable {
 export interface CustomAlerterEndpoint {
     /** The http/s endpoint to send the POST to */
     url: string;
+    /** The Data format to send to the custom url */
+    data_template: string;
+    data_format: string;
 }
 /**
  * Deletes the action at the given id, and returns the deleted action.

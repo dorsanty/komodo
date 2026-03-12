@@ -15,6 +15,15 @@ use super::{
   resource::{Resource, ResourceListItem, ResourceQuery},
 };
 
+#[derive(
+  Debug, Clone, PartialEq, Serialize, Deserialize, EnumVariants,
+)]
+pub enum AlerterDataFormat {
+  Data,
+  PrettyString,
+  String,
+}
+
 #[typeshare]
 pub type Alerter = Resource<AlerterConfig, ()>;
 
@@ -147,14 +156,16 @@ pub struct CustomAlerterEndpoint {
   #[serde(default = "default_custom_url")]
   #[builder(default = "default_custom_url()")]
   pub url: String,
-  pub custom_params: String,
+  pub data_template: String,
+  pub data_format: AlerterDataFormat,
 }
 
 impl Default for CustomAlerterEndpoint {
   fn default() -> Self {
     Self {
       url: default_custom_url(),
-      custom_params: String::from("%alert%"),
+      data_template: String::from("%alert%"),
+      data_format: AlerterDataFormat::Data,
     }
   }
 }

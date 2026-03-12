@@ -229,6 +229,16 @@ export type AlerterEndpoint =
 	/** Send alert to Pushover */
 	| { type: "Pushover", params: PushoverAlerterEndpoint };
 
+/** Types of Post Data formatting */
+export enum AlerterDataFormat {
+	/** Alert data formatted as serialized to JSON */
+	Data = "Data",
+	/** Alert data formatted as escaped String */
+	String = "String",
+	/** Alert data Pretty formatted and escaped String */
+	PrettyString = "PrettyString",
+};
+
 /** Used to reference a specific resource across all resource types */
 export type ResourceTarget = 
 	| { type: "System", id: string }
@@ -5218,7 +5228,8 @@ export interface CustomAlerterEndpoint {
 	/** The http/s endpoint to send the POST to */
 	url: string;
 	/** The custom key:value params to include in the POST to url */
-	custom_params?: string;
+	data_template?: string;
+	data_format?: AlerterDataFormat;
 }
 
 /**

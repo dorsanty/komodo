@@ -18,6 +18,12 @@ const ENDPOINT_TYPES: Types.AlerterEndpoint["type"][] = [
   "Pushover",
 ];
 
+const CUSTOM_DATA_TYPES = [
+  "Data",
+  "String",
+  "PrettyString",
+];
+
 export const EndpointConfig = ({
   endpoint,
   set,
@@ -60,23 +66,43 @@ export const EndpointConfig = ({
         readOnly={disabled}
       />
       { endpoint.type == "Custom" ? (
-         <ConfigItem
-          label="Custom Data"
-          description="Customize the HTTP POST request data. The alert content can be used as '%alert%'"
+        <ConfigItem
+          label="Post Data format"
+          description="Template for the HTTP POST data. The alert template variable is '%alert%'"
         >
-          <Input
-            value={endpoint.params.custom_params}
-            type="text"
-            readOnly={disabled}
-            placeholder="%alert%"
-            onChange={(input) =>
+          <Select
+            value={endpoint.params.data_format ?? "Data"}
+            onValueChange={(format: Types.AlerterDataFormat) => {
               set({
                 ...endpoint,
-                params: { ...endpoint.params, custom_params: input.target.value },
+                params: { ...endpoint.params, data_format: data_format(format) },
               })
-            }
-          ></Input>
-        </ConfigItem>          
+            }}
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-[150px]" disabled={disabled}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>             
+              {CUSTOM_DATA_TYPES.map((data_format) => (
+              <SelectItem key={data_format} value={data_format}>
+                {data_format}
+              </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <MonacoEditor
+            value={endpoint.params.data_template ?? "%alert%"}
+            language={undefined}
+            onValueChange={(template) => {
+              set({
+                ...endpoint,
+                params: { ...endpoint.params, data_template: template },
+              })
+            }}
+            readOnly={disabled}
+          />
+        </ConfigItem>         
       ) : endpoint.type == "Ntfy" ? (
         <ConfigItem
           label="Email"
@@ -114,4 +140,15 @@ const default_url = (type: Types.AlerterEndpoint["type"]) => {
           : type === "Pushover"
             ? "https://api.pushover.net/1/messages.json?token=XXXXXXXXXXXXX&user=XXXXXXXXXXXXX"
             : "";
+};
+
+const data_format = (format: string): Types.AlerterDataFormat => {
+  switch (format) {
+    case "String":
+      return Types.AlerterDataFormat.String;
+    case "PrettyString":
+      return Types.AlerterDataFormat.PrettyString;
+    default:
+      return Types.AlerterDataFormat.Data;
+  }
 };
