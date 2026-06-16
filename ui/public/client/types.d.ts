@@ -6754,12 +6754,6 @@ export interface CustomAlerterEndpoint {
     body_template?: string;
     content_type?: string;
 }
-
-/* Configuration for the Custom Alert Data. */
-export interface CustomAlertData {
-    data: Record<string, unknown>;
-    format: string;
-}
 /**
  * Deletes the action at the given id, and returns the deleted action.
  * Response: [Action]
