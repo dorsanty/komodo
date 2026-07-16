@@ -10,7 +10,6 @@ use komodo_client::entities::{
   komodo_timestamp,
   stack::StackState,
 };
-use uuid::timestamp::context;
 
 use crate::helpers::query::get_variables_and_secrets;
 use crate::helpers::{
